@@ -1,12 +1,13 @@
 from flask import request, make_response, jsonify
 from v1.basecontroller import BaseController
-from v1.dog.model import DogModel
+from v1.user.model import UserModel
 
-class DogController(BaseController):
+
+class UserController(BaseController):
     _instance = None
 
     def __init__(self) -> None:
-        self._instance = DogModel()
+        self._instance = UserModel()
 
     def post(self):
         print(request.json)
@@ -22,30 +23,30 @@ class DogController(BaseController):
             )
         return jsonify(resp)
 
-    def check(self, dog_id, filters=None):
+    def check(self, user_id, filters=None):
         if filters is not None:
-            filters["id"] = dog_id
+            filters["id"] = user_id
         else:
-            filters = {"id": dog_id}
-        dog = self._instance.read(filters)
-        if dog is None:
-            return make_response(jsonify({"error": "Dog id not found."}), 404)
-        return dog
+            filters = {"id": user_id}
+        user = self._instance.read(filters)
+        if user is None:
+            return make_response(jsonify({"error": "user id not found."}), 404)
+        return user
 
-    def get(self, dog_id=None):
+    def get(self, user_id=None):
         filters = {}
         if "fields" in request.args:
             filters["fields"] = request.args["fields"].split(",")
-        if dog_id is not None:
-            dog = self.check(dog_id, filters)
-            if not isinstance(dog, dict):
-                return dog
-            return jsonify(dog)
+        if user_id is not None:
+            user = self.check(user_id, filters)
+            if not isinstance(user, dict):
+                return user
+            return jsonify(user)
         filters["offset"] = (
             int(request.args["offset"]) if "offset" in request.args else 0
         )
         filters["limit"] = int(request.args["limit"]) if "limit" in request.args else 5
-        dogs = self._instance.read(filters)
+        users = self._instance.read(filters)
         total = self._instance.read(filters, True)
         return jsonify(
             {
@@ -55,18 +56,18 @@ class DogController(BaseController):
                         total, filters["offset"], filters["limit"]
                     ),
                 },
-                "data": dogs,
+                "data": users,
             }
         )
 
-    def put(self, dog_id=None):
-        if dog_id is not None:
-            dog = self.check(dog_id)
-            if not isinstance(dog, dict):
-                return dog
-            dog_data = request.json
-            dog_data["id"] = dog_id
-            resp = self._instance.update(dog_data)
+    def put(self, user_id=None):
+        if user_id is not None:
+            user = self.check(user_id)
+            if not isinstance(user, dict):
+                return user
+            user_data = request.json
+            user_data["id"] = user_id
+            resp = self._instance.update(user_data)
             if resp == False:
                 return make_response(
                     jsonify(
@@ -79,10 +80,10 @@ class DogController(BaseController):
             return jsonify(resp)
         return jsonify(self._instance.update(request.json))
 
-    def delete(self, dog_id=None):
-        if dog_id is not None:
-            dog = self.check(dog_id)
-            if not isinstance(dog, dict):
-                return dog
-            return jsonify(self._instance.delete(dog_id))
+    def delete(self, user_id=None):
+        if user_id is not None:
+            user = self.check(user_id)
+            if not isinstance(user, dict):
+                return user
+            return jsonify(self._instance.delete(user_id))
         return jsonify(self._instance.delete(request.json))
